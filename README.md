@@ -153,7 +153,7 @@ PotatoCardApp
 
 ## 📄 License
 
-本项目基于 MIT License 开源。  
+本项目基于 Apache License 2.0 开源。  
 在使用、修改或分发本项目时，请遵守相关开源协议。
 
 ---
