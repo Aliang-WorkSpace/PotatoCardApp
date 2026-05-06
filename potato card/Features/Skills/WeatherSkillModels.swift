@@ -133,8 +133,8 @@ struct WeatherTargetDeviceSnapshot: Codable, Equatable {
 struct WeatherSkillConfiguration: Codable, Equatable {
     var isEnabled = true
     var isAutoUpdateEnabled = false
-    var apiKey = "55cc91e7445647ad83f53a20f5f575e0"
-    var apiHost = "ny49vju4ux.re.qweatherapi.com"
+    var apiKey = WeatherLocalSecrets.apiKey ?? ""
+    var apiHost = WeatherLocalSecrets.apiHost ?? ""
     var cityMode: WeatherCityMode = .automatic
     var fixedCityQuery = "深圳"
     var fixedLocation: WeatherLocationOption?

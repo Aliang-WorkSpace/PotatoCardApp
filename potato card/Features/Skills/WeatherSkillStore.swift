@@ -233,10 +233,14 @@ final class WeatherSkillStore: ObservableObject {
         }
 
         let defaultConfiguration = WeatherSkillConfiguration()
-        if configuration.apiHost.trimmed.isEmpty || configuration.apiHost.trimmed == "C45F5YBXTW.re.qweatherapi.com" {
+        if let apiHost = WeatherLocalSecrets.apiHost {
+            configuration.apiHost = apiHost
+        } else if configuration.apiHost.trimmed.isEmpty {
             configuration.apiHost = defaultConfiguration.apiHost
         }
-        if configuration.apiKey.trimmed.isEmpty {
+        if let apiKey = WeatherLocalSecrets.apiKey {
+            configuration.apiKey = apiKey
+        } else if configuration.apiKey.trimmed.isEmpty {
             configuration.apiKey = defaultConfiguration.apiKey
         }
 
