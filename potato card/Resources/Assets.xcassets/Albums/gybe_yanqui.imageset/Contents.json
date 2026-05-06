@@ -1,0 +1,12 @@
+{
+  "images" : [
+    {
+      "filename" : "gybe_yanqui.jpg",
+      "idiom" : "universal"
+    }
+  ],
+  "info" : {
+    "author" : "xcode",
+    "version" : 1
+  }
+}

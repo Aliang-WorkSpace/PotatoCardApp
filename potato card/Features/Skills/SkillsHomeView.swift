@@ -2,6 +2,7 @@ import SwiftUI
 import UIKit
 
 struct SkillsHomeView: View {
+    let onAlbumTransferToDevice: (String) -> Void
     @EnvironmentObject private var bleService: BleTransferService
     @Environment(\.colorScheme) private var colorScheme
     @StateObject private var weatherStore = WeatherSkillStore()
@@ -13,6 +14,7 @@ struct SkillsHomeView: View {
             VStack(alignment: .leading, spacing: 14) {
                 header
                 weatherSkillCard
+                albumSkillCard
                 upcomingSkillCard
             }
             .padding(.horizontal, 18)
@@ -217,6 +219,63 @@ struct SkillsHomeView: View {
         .shadow(color: Color.black.opacity(colorScheme == .dark ? 0.10 : 0.025), radius: 8, x: 0, y: 3)
     }
 
+    private var albumSkillCard: some View {
+        NavigationLink {
+            AlbumView(onTransferToDevice: onAlbumTransferToDevice)
+                .environmentObject(bleService)
+                .padding(.horizontal, 24)
+                .padding(.top, 22)
+                .background(skillsDestinationBackground.ignoresSafeArea())
+                .navigationBarTitleDisplayMode(.inline)
+                .toolbar(.visible, for: .navigationBar)
+        } label: {
+            HStack(spacing: 12) {
+                ZStack {
+                    RoundedRectangle(cornerRadius: 12, style: .continuous)
+                        .fill(
+                            LinearGradient(
+                                colors: [
+                                    Color(red: 0.10, green: 0.10, blue: 0.12),
+                                    Color(red: 0.74, green: 0.20, blue: 0.22)
+                                ],
+                                startPoint: .topLeading,
+                                endPoint: .bottomTrailing
+                            )
+                        )
+                        .frame(width: 42, height: 42)
+
+                    Image(systemName: "music.note.list")
+                        .font(.system(size: 18, weight: .semibold))
+                        .foregroundStyle(.white)
+                }
+
+                VStack(alignment: .leading, spacing: 2) {
+                    Text("专辑封面")
+                        .font(.system(size: 17, weight: .semibold))
+                        .foregroundStyle(primaryTextColor)
+                    Text("惘闻、黑帝封面快速传输")
+                        .font(.system(size: 12, weight: .medium))
+                        .foregroundStyle(secondaryTextColor)
+                        .lineLimit(1)
+                }
+
+                Spacer(minLength: 10)
+
+                Image(systemName: "chevron.right")
+                    .font(.system(size: 13, weight: .semibold))
+                    .foregroundStyle(secondaryTextColor)
+            }
+            .padding(14)
+            .background(cardFillColor.opacity(0.95), in: RoundedRectangle(cornerRadius: 14, style: .continuous))
+            .overlay(
+                RoundedRectangle(cornerRadius: 14, style: .continuous)
+                    .stroke(cardStrokeColor, lineWidth: 1)
+            )
+            .shadow(color: Color.black.opacity(colorScheme == .dark ? 0.10 : 0.025), radius: 8, x: 0, y: 3)
+        }
+        .buttonStyle(.plain)
+    }
+
     private var weatherPreview: some View {
         ZStack {
             RoundedRectangle(cornerRadius: 14, style: .continuous)
@@ -343,6 +402,10 @@ struct SkillsHomeView: View {
 
     private var buttonFillColor: Color {
         colorScheme == .dark ? Color.white.opacity(0.08) : Color.black.opacity(0.04)
+    }
+
+    private var skillsDestinationBackground: Color {
+        colorScheme == .dark ? Color.black : Color(red: 0.97, green: 0.97, blue: 0.96)
     }
 
     // 旧版本可能只在蓝牙服务里保留了当前设备，没有真正写进天气技能配置，这里顺手补齐一次。
@@ -475,6 +538,11 @@ private struct WeatherSkillDetailView: View {
                 set: { store.updateEnabled($0) }
             ))
             dividerRow
+            detailToggleRow(title: "每小时自动更新", isOn: Binding(
+                get: { store.config.isAutoUpdateEnabled },
+                set: { store.updateAutoUpdateEnabled($0) }
+            ))
+            dividerRow
             detailNavigationRow(title: "城市模式", value: store.config.cityMode.title) {
                 WeatherCitySelectionView(store: store)
             }
@@ -555,7 +623,7 @@ private struct WeatherSkillDetailView: View {
 
     private var actionsSection: some View {
         VStack(spacing: 12) {
-            Text("快捷指令“天气推送”会默认推送到这里选中的设备。")
+            Text("快捷指令“天气推送”会默认推送到这里选中的设备；自动更新只会在上次投屏内容仍是天气时执行。")
                 .font(.system(size: 13, weight: .medium))
                 .foregroundStyle(secondaryTextColor)
                 .frame(maxWidth: .infinity, alignment: .leading)
@@ -1137,7 +1205,7 @@ private struct WeatherSkillSyncView: View {
             .onChange(of: bleService.transferPhase) { _, phase in
                 guard phase == .succeeded, !didHandleSuccess else { return }
                 didHandleSuccess = true
-                bleService.markLastTransferredImage(context.displayImage)
+                bleService.markLastTransferredImage(context.displayImage, contentType: .weather)
                 onSynchronized()
             }
         }
@@ -1165,7 +1233,7 @@ private struct SkillsHomeView_Previews: PreviewProvider {
         NavigationStack {
             ZStack {
                 Color.white.ignoresSafeArea()
-                SkillsHomeView()
+                SkillsHomeView(onAlbumTransferToDevice: { _ in })
                     .environmentObject(BleTransferService(forcePreviewPrompt: true))
             }
         }

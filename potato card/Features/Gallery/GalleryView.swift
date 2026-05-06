@@ -144,13 +144,16 @@ struct GalleryView: View {
         importedPhotos.reserveCapacity(items.count)
 
         for (offset, item) in items.enumerated() {
-            guard
-                let data = try? await item.loadTransferable(type: Data.self),
-                let photo = GalleryCacheStore.appendPhoto(
-                    data: data,
-                    title: "照片 \(startIndex + offset + 1)"
-                )
-            else {
+            guard let data = try? await item.loadTransferable(type: Data.self) else {
+                continue
+            }
+
+            let title = "照片 \(startIndex + offset + 1)"
+            let importTask = Task.detached(priority: .utility) {
+                GalleryCacheStore.appendPhoto(data: data, title: title)
+            }
+
+            guard let photo = await importTask.value else {
                 continue
             }
 
@@ -292,6 +295,8 @@ private struct GalleryImageViewer: View {
                 TransferSheetView(
                     sourceImage: request.photo.image,
                     title: request.photo.title,
+                    sourceIdentifier: "gallery:\(request.photo.id.uuidString)",
+                    contentType: .gallery,
                     onTransferSucceeded: {
                         onTransferToDevice(request.photo.imageData)
                         dismiss()
@@ -303,7 +308,7 @@ private struct GalleryImageViewer: View {
             .onChange(of: bleService.transferPhase) { _, phase in
                 guard phase == .succeeded, let data = pendingTransferData else { return }
                 if let pendingTransferImage {
-                    bleService.markLastTransferredImage(pendingTransferImage)
+                    bleService.markLastTransferredImage(pendingTransferImage, contentType: .gallery)
                 }
                 onTransferToDevice(data)
                 pendingTransferData = nil

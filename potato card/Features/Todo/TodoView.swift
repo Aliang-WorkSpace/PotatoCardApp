@@ -22,7 +22,7 @@ struct TodoView: View {
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
         .onChange(of: bleService.transferPhase) { _, phase in
             guard phase == .succeeded, let pendingDisplayImage else { return }
-            bleService.markLastTransferredImage(pendingDisplayImage)
+            bleService.markLastTransferredImage(pendingDisplayImage, contentType: .todo)
             self.pendingDisplayImage = nil
         }
     }
@@ -217,7 +217,7 @@ struct TodoView: View {
     private func addTodo() {
         store.add(newTodoTitle)
         newTodoTitle = ""
-        isNewTodoFocused = true
+        isNewTodoFocused = false
     }
 
     private func beginEditing(_ item: TodoItem) {

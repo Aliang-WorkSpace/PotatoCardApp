@@ -100,7 +100,7 @@ final class WeatherSkillPushCoordinator {
         )
         logger.info("蓝牙推送成功：\(device.name, privacy: .public)")
 
-        bleService.markLastTransferredImage(prepared.displayImage)
+        bleService.markLastTransferredImage(prepared.displayImage, contentType: .weather)
         store.updateTargetDevice(device)
         store.markSynced()
         return "已推送到\(device.name)"
@@ -137,7 +137,7 @@ final class WeatherSkillPushCoordinator {
         )
 
         // 非阻塞快捷指令只表示“已开始”，不能提前写入同步成功时间。
-        bleService.markLastTransferredImage(prepared.displayImage, for: targetDeviceSnapshot.id)
+        bleService.markLastTransferredImage(prepared.displayImage, for: targetDeviceSnapshot.id, contentType: .weather)
         store.updateTargetDeviceSnapshot(targetDeviceSnapshot)
         return "已开始推送到\(targetDeviceSnapshot.name)"
     }

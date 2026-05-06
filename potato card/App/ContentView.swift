@@ -12,7 +12,6 @@ struct ContentView: View {
     private enum Tab: Hashable {
         case home
         case gallery
-        case album
         case todo
         case skills
     }
@@ -48,14 +47,6 @@ struct ContentView: View {
                     Label("图库", systemImage: "photo.on.rectangle")
                 }
                 .tag(Tab.gallery)
-
-            tabContent(.album) {
-                albumTab
-            }
-                .tabItem {
-                    Label("专辑", systemImage: "music.note.list")
-                }
-                .tag(Tab.album)
 
             tabContent(.todo) {
                 todoTab
@@ -147,24 +138,6 @@ struct ContentView: View {
         }
     }
 
-    private var albumTab: some View {
-        NavigationStack {
-            ZStack(alignment: .top) {
-                backgroundColor
-                    .ignoresSafeArea()
-
-                AlbumView { album in
-                    transferredAlbumName = album
-                    transferredPhotoPath = ""
-                    selectedTab = .home
-                }
-                .padding(.horizontal, 24)
-                .padding(.top, 22)
-            }
-            .toolbar(.hidden, for: .navigationBar)
-        }
-    }
-
     private var todoTab: some View {
         NavigationStack {
             ZStack(alignment: .top) {
@@ -185,7 +158,11 @@ struct ContentView: View {
                 backgroundColor
                     .ignoresSafeArea()
 
-                SkillsHomeView()
+                SkillsHomeView { album in
+                    transferredAlbumName = album
+                    transferredPhotoPath = ""
+                    selectedTab = .home
+                }
                     .padding(.top, 0)
             }
             .toolbar(.hidden, for: .navigationBar)
@@ -242,7 +219,9 @@ struct ContentView: View {
 
                     HStack(spacing: 12) {
                         bluetoothStatusIcon
-                        batteryStatusPill
+                        if displayedBatteryStatus != nil {
+                            batteryStatusPill
+                        }
                     }
                     .padding(.bottom, 25)
                 }
@@ -395,14 +374,14 @@ struct ContentView: View {
     }
 
     private var batteryStatusPill: some View {
-        let percent = displayedBatteryPercent
-        let color = batteryLevelColor(for: percent)
+        let status = displayedBatteryStatus ?? BatteryStatus(text: "", fillPercent: 0, level: .percent(0))
+        let color = batteryLevelColor(for: status.level)
 
         return HStack(spacing: 7) {
-            BatteryLevelIcon(percent: percent, color: color)
+            BatteryLevelIcon(percent: status.fillPercent, color: color)
                 .frame(width: 22, height: 12)
 
-            Text(percent.map { "\($0)%" } ?? "--%")
+            Text(status.text)
                 .font(.system(size: 12, weight: .semibold))
                 .monospacedDigit()
                 .foregroundStyle(secondaryTextColor)
@@ -416,22 +395,30 @@ struct ContentView: View {
         )
     }
 
-    private var displayedBatteryPercent: Int? {
-        (bleService.connectedDevice ?? bleService.selectedDevice)?.batteryPercent
+    private var displayedBatteryStatus: BatteryStatus? {
+        (bleService.connectedDevice ?? bleService.selectedDevice)?.batteryStatus
     }
 
-    private func batteryLevelColor(for percent: Int?) -> Color {
-        guard let percent else {
-            return secondaryTextColor.opacity(0.48)
-        }
-
-        switch percent {
-        case 0..<20:
-            return .red
-        case 20..<50:
-            return .yellow
-        default:
-            return .green
+    private func batteryLevelColor(for level: BatteryStatus.Level) -> Color {
+        switch level {
+        case .percent(let percent):
+            switch percent {
+            case 0..<20:
+                return .red
+            case 20..<50:
+                return .yellow
+            default:
+                return .green
+            }
+        case .voltage(let voltage):
+            switch voltage {
+            case ..<2.6:
+                return .red
+            case ..<3.0:
+                return .yellow
+            default:
+                return .green
+            }
         }
     }
 
@@ -475,9 +462,6 @@ struct ContentView: View {
             // 分批加载不触发定位/网络的页面，避免用户第一次切换时集中解码资源。
             try? await Task.sleep(nanoseconds: 1_200_000_000)
             loadedTabs.insert(.gallery)
-
-            try? await Task.sleep(nanoseconds: 500_000_000)
-            loadedTabs.insert(.album)
 
             try? await Task.sleep(nanoseconds: 500_000_000)
             loadedTabs.insert(.todo)
@@ -585,18 +569,18 @@ struct ContentView: View {
 }
 
 private struct BatteryLevelIcon: View {
-    let percent: Int?
+    let percent: Int
     let color: Color
 
     private var fillRatio: CGFloat {
-        CGFloat(percent ?? 0) / 100
+        CGFloat(percent) / 100
     }
 
     var body: some View {
         HStack(spacing: 1.5) {
             ZStack(alignment: .leading) {
                 RoundedRectangle(cornerRadius: 2.6, style: .continuous)
-                    .stroke(color.opacity(percent == nil ? 0.55 : 1), lineWidth: 1.4)
+                    .stroke(color, lineWidth: 1.4)
 
                 GeometryReader { proxy in
                     RoundedRectangle(cornerRadius: 1.8, style: .continuous)
@@ -607,7 +591,7 @@ private struct BatteryLevelIcon: View {
             }
 
             RoundedRectangle(cornerRadius: 0.8, style: .continuous)
-                .fill(color.opacity(percent == nil ? 0.55 : 1))
+                .fill(color)
                 .frame(width: 2.2, height: 5.5)
         }
     }

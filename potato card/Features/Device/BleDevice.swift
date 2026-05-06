@@ -8,6 +8,8 @@ struct BleDevice: Identifiable, Hashable {
     let rawDevice: [AnyHashable: Any]
     let profile: EInkDeviceProfile
     let batteryPercent: Int?
+    let batteryVoltage: Double?
+    let batterySource: String?
 
     init(rawDevice: [AnyHashable: Any]) {
         self.rawDevice = rawDevice
@@ -29,7 +31,11 @@ struct BleDevice: Identifiable, Hashable {
         // 设备型号表依赖 NEMR 编号，蓝牙名是 PICKSMART 时也要优先用编号匹配。
         let profileLookupName = normalizedMacAddress ?? normalizedMac ?? normalizedName ?? self.name
         self.profile = EInkDeviceProfile.profile(for: profileLookupName)
-        self.batteryPercent = BleDevice.parseBatteryPercent(from: rawDevice)
+        let parsedPercent = BleDevice.parseBatteryPercent(from: rawDevice)
+        let parsedVoltage = BleDevice.parseBatteryVoltage(from: rawDevice)
+        self.batteryPercent = parsedPercent?.value
+        self.batteryVoltage = parsedVoltage?.value
+        self.batterySource = parsedPercent?.source ?? parsedVoltage?.source
     }
 
     static func == (lhs: BleDevice, rhs: BleDevice) -> Bool {
@@ -44,8 +50,38 @@ struct BleDevice: Identifiable, Hashable {
         WeatherTargetDeviceSnapshot(device: self)
     }
 
+    var sdkTransferDevice: [AnyHashable: Any] {
+        var device = rawDevice.filter { _, value in
+            !(value is NSNull)
+        }
+
+        let stableName = name.isEmpty ? id : name
+        let stableAddress = address.isEmpty ? id : address
+
+        device["name"] = BleDevice.normalizedString(device["name"] as? String) ?? stableName
+        device["mac"] = BleDevice.normalizedString(device["mac"] as? String) ?? stableAddress
+        device["macAddress"] = BleDevice.normalizedString(device["macAddress"] as? String) ?? stableAddress
+        device["address"] = BleDevice.normalizedString(device["address"] as? String) ?? stableAddress
+
+        return device
+    }
+
     var debugSummary: String {
-        "name=\(name), address=\(address.isEmpty ? "<empty>" : address), id=\(id), battery=\(batteryPercent.map(String.init) ?? "nil"), profile=\(profile.name) \(profile.displaySize), raw=\(debugRawSummary)"
+        let batteryText = batteryPercent.map { "\($0)%" } ?? batteryVoltage.map { String(format: "%.1fV", $0) } ?? "nil"
+        return "name=\(name), address=\(address.isEmpty ? "<empty>" : address), id=\(id), battery=\(batteryText), batterySource=\(batterySource ?? "nil"), profile=\(profile.name) \(profile.displaySize), raw=\(debugRawSummary)"
+    }
+
+    var batteryStatus: BatteryStatus? {
+        if let batteryPercent {
+            return BatteryStatus(text: "\(batteryPercent)%", fillPercent: batteryPercent, level: .percent(batteryPercent))
+        }
+
+        if let batteryVoltage {
+            let fillPercent = Self.estimatedBatteryPercent(fromVoltage: batteryVoltage)
+            return BatteryStatus(text: String(format: "%.1fV", batteryVoltage), fillPercent: fillPercent, level: .voltage(batteryVoltage))
+        }
+
+        return nil
     }
 
     private var debugRawSummary: String {
@@ -61,13 +97,26 @@ struct BleDevice: Identifiable, Hashable {
         return "{\(pairs.joined(separator: ", "))}"
     }
 
-    private static func parseBatteryPercent(from rawDevice: [AnyHashable: Any]) -> Int? {
-        let preferredKeys = ["bettery", "battery", "batteryLevel", "electricity"]
+    private static func parseBatteryPercent(from rawDevice: [AnyHashable: Any]) -> (value: Int, source: String)? {
+        let preferredKeys = ["power", "bettery", "battery", "batteryLevel", "electricity", "batteryPercent"]
 
         for key in preferredKeys {
             guard let rawValue = rawDevice[key] else { continue }
             if let percent = normalizedBatteryPercent(from: rawValue) {
-                return percent
+                return (percent, key)
+            }
+        }
+
+        return nil
+    }
+
+    private static func parseBatteryVoltage(from rawDevice: [AnyHashable: Any]) -> (value: Double, source: String)? {
+        let preferredKeys = ["powerLevel", "voltage", "batteryVoltage", "batteryVolt", "vbat"]
+
+        for key in preferredKeys {
+            guard let rawValue = rawDevice[key] else { continue }
+            if let voltage = normalizedBatteryVoltage(from: rawValue) {
+                return (voltage, key)
             }
         }
 
@@ -108,6 +157,45 @@ struct BleDevice: Identifiable, Hashable {
 
         return Int(percent.rounded())
     }
+
+    private static func normalizedBatteryVoltage(from rawValue: Any) -> Double? {
+        let value: Double?
+
+        if let number = rawValue as? NSNumber {
+            value = number.doubleValue
+        } else if let string = rawValue as? String {
+            let normalizedString = string
+                .trimmingCharacters(in: .whitespacesAndNewlines)
+                .replacingOccurrences(of: "V", with: "")
+                .replacingOccurrences(of: "v", with: "")
+            value = Double(normalizedString)
+        } else {
+            value = nil
+        }
+
+        guard let value else { return nil }
+
+        let voltage = value > 10 ? value / 10 : value
+        guard voltage >= 1.5, voltage <= 5.5 else { return nil }
+
+        return voltage
+    }
+
+    private static func estimatedBatteryPercent(fromVoltage voltage: Double) -> Int {
+        let normalized = (voltage - 2.4) / (3.3 - 2.4)
+        return Int((min(max(normalized, 0), 1) * 100).rounded())
+    }
+}
+
+struct BatteryStatus: Equatable, Hashable {
+    enum Level: Equatable, Hashable {
+        case percent(Int)
+        case voltage(Double)
+    }
+
+    let text: String
+    let fillPercent: Int
+    let level: Level
 }
 
 struct EInkDeviceProfile: Equatable {

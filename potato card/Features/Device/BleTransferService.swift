@@ -181,6 +181,7 @@ final class BleTransferService: ObservableObject {
     @Published private(set) var lastTransferredImage: UIImage?
     private var wantsForegroundAutoScan = false
     private let transferredImageStore = TransferredDeviceImageStore()
+    private let projectedContentStore = ProjectedContentStore()
     private let liveTransferActivity = LiveTransferActivityController()
     private var transferBackgroundTaskID: UIBackgroundTaskIdentifier = .invalid
     private var transferPresentationMode: BleTransferPresentationMode = .interactive
@@ -360,15 +361,17 @@ final class BleTransferService: ObservableObject {
         transfer(image: image, to: device)
     }
 
-    func markLastTransferredImage(_ image: UIImage) {
+    func markLastTransferredImage(_ image: UIImage, contentType: ProjectedContentType = .unknown) {
         lastTransferredImage = image
         guard let device = connectedDevice ?? selectedDevice else { return }
         transferredImageStore.save(image, for: device.id)
+        projectedContentStore.save(type: contentType, for: device.id)
     }
 
-    func markLastTransferredImage(_ image: UIImage, for deviceID: String) {
+    func markLastTransferredImage(_ image: UIImage, for deviceID: String, contentType: ProjectedContentType = .unknown) {
         lastTransferredImage = image
         transferredImageStore.save(image, for: deviceID)
+        projectedContentStore.save(type: contentType, for: deviceID)
     }
 
     private func presentPromptIfNeeded(for device: BleDevice?) {
@@ -482,6 +485,7 @@ final class BleTransferService: NSObject, ObservableObject, PickBleManagerDelega
 
     private lazy var manager = PickBleManager.shared()
     private let transferredImageStore = TransferredDeviceImageStore()
+    private let projectedContentStore = ProjectedContentStore()
     private let liveTransferActivity = LiveTransferActivityController()
     private var transferBackgroundTaskID: UIBackgroundTaskIdentifier = .invalid
     private var didStartManagerWork = false
@@ -615,8 +619,9 @@ final class BleTransferService: NSObject, ObservableObject, PickBleManagerDelega
         currentAddress = transferDevice.address
         errorMessage = nil
         beginTransferAuxiliaryWorkIfNeeded(for: transferDevice.name)
+        logger.info("开始蓝牙图片传输：device=\(transferDevice.debugSummary, privacy: .public), image=\(Int(image.size.width), privacy: .public)x\(Int(image.size.height), privacy: .public), profile=\(transferDevice.profile.displaySize, privacy: .public), colorMode=\(transferDevice.profile.colorMode.rawValue, privacy: .public)")
 
-        manager.updateImage(withDevice: transferDevice.rawDevice, image: image)
+        manager.updateImage(withDevice: transferDevice.sdkTransferDevice, image: image)
     }
 
     func pushWeatherImage(_ image: UIImage, toTargetDeviceSnapshot snapshot: WeatherTargetDeviceSnapshot) async throws -> BleDevice {
@@ -737,6 +742,8 @@ final class BleTransferService: NSObject, ObservableObject, PickBleManagerDelega
 
         Task { @MainActor in
             let bleDevice = BleDevice(rawDevice: payloadBox.payload)
+            self.logger.info("扫描发现设备：\(bleDevice.debugSummary, privacy: .public)")
+            NSLog("扫描发现设备：%@", bleDevice.debugSummary)
 
             if let index = self.devices.firstIndex(where: { $0.id == bleDevice.id }) {
                 self.devices[index] = bleDevice
@@ -827,15 +834,17 @@ final class BleTransferService: NSObject, ObservableObject, PickBleManagerDelega
         }
     }
 
-    func markLastTransferredImage(_ image: UIImage) {
+    func markLastTransferredImage(_ image: UIImage, contentType: ProjectedContentType = .unknown) {
         lastTransferredImage = image
         guard let device = connectedDevice ?? selectedDevice else { return }
         transferredImageStore.save(image, for: device.id)
+        projectedContentStore.save(type: contentType, for: device.id)
     }
 
-    func markLastTransferredImage(_ image: UIImage, for deviceID: String) {
+    func markLastTransferredImage(_ image: UIImage, for deviceID: String, contentType: ProjectedContentType = .unknown) {
         lastTransferredImage = image
         transferredImageStore.save(image, for: deviceID)
+        projectedContentStore.save(type: contentType, for: deviceID)
     }
 
     private func presentPromptIfNeeded(for device: BleDevice) {

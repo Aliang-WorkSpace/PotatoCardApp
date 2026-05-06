@@ -45,6 +45,11 @@ final class WeatherSkillStore: ObservableObject {
         persistConfiguration()
     }
 
+    func updateAutoUpdateEnabled(_ isEnabled: Bool) {
+        config.isAutoUpdateEnabled = isEnabled
+        persistConfiguration()
+    }
+
     func updateAPIKey(_ value: String) {
         let trimmedValue = value.trimmed
         config.apiKey = trimmedValue
@@ -222,9 +227,17 @@ final class WeatherSkillStore: ObservableObject {
     private static func loadConfiguration(decoder: JSONDecoder, userDefaults: UserDefaults) -> WeatherSkillConfiguration {
         guard
             let data = userDefaults.data(forKey: Constants.configurationKey),
-            let configuration = try? decoder.decode(WeatherSkillConfiguration.self, from: data)
+            var configuration = try? decoder.decode(WeatherSkillConfiguration.self, from: data)
         else {
             return WeatherSkillConfiguration()
+        }
+
+        let defaultConfiguration = WeatherSkillConfiguration()
+        if configuration.apiHost.trimmed.isEmpty || configuration.apiHost.trimmed == "C45F5YBXTW.re.qweatherapi.com" {
+            configuration.apiHost = defaultConfiguration.apiHost
+        }
+        if configuration.apiKey.trimmed.isEmpty {
+            configuration.apiKey = defaultConfiguration.apiKey
         }
 
         return configuration
@@ -480,12 +493,14 @@ actor WeatherSkillService {
 
         var request = URLRequest(url: url)
         request.setValue(credentials.apiKey, forHTTPHeaderField: "X-QW-Api-Key")
-        request.setValue("gzip", forHTTPHeaderField: "Accept-Encoding")
+        if let bundleIdentifier = Bundle.main.bundleIdentifier {
+            request.setValue(bundleIdentifier, forHTTPHeaderField: "X-QW-iOS-Bundle-Id")
+        }
         request.timeoutInterval = 15
 
         let (data, response) = try await URLSession.shared.data(for: request)
         guard let httpResponse = response as? HTTPURLResponse, 200..<300 ~= httpResponse.statusCode else {
-            throw WeatherSkillError.remote("天气服务请求失败，请检查 API Host、API Key 或网络状态。")
+            throw WeatherSkillError.remote(Self.errorMessage(from: data) ?? "天气服务请求失败，请检查 API Host、API Key 或网络状态。")
         }
 
         do {
@@ -529,6 +544,24 @@ actor WeatherSkillService {
         default:
             return "天气服务返回了错误代码 \(code)。"
         }
+    }
+
+    private static func errorMessage(from data: Data) -> String? {
+        guard
+            let object = try? JSONSerialization.jsonObject(with: data) as? [String: Any],
+            let error = object["error"] as? [String: Any]
+        else {
+            return nil
+        }
+
+        let title = error["title"] as? String
+        let detail = error["detail"] as? String
+        let parts = [title, detail]
+            .compactMap { $0?.trimmed }
+            .filter { !$0.isEmpty }
+
+        guard !parts.isEmpty else { return nil }
+        return "和风天气请求失败：\(parts.joined(separator: "，"))"
     }
 
     private static func parseDate(_ string: String) -> Date? {

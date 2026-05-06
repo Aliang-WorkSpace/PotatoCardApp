@@ -16,7 +16,7 @@ enum EInkImageFitMode: String, CaseIterable, Identifiable {
     }
 }
 
-struct EInkManualAdjustment: Equatable {
+struct EInkManualAdjustment: Codable, Equatable {
     var scale: CGFloat = 1
     var offsetX: CGFloat = 0
     var offsetY: CGFloat = 0
@@ -74,7 +74,7 @@ enum EInkImageRenderer {
         }
     }
 
-    private static func drawRect(
+    static func drawRect(
         for imageSize: CGSize,
         targetSize: CGSize,
         fitMode: EInkImageFitMode,

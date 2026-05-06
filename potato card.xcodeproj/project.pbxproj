@@ -47,11 +47,21 @@
 			);
 			target = B1A000000000000000000008 /* TransferLiveActivityWidget */;
 		};
+		B1A00000000000000000000F /* Exceptions for "potato card" folder in "potato card" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				Info.plist,
+			);
+			target = A86A54252F894613001EC8F6 /* potato card */;
+		};
 /* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
 		A86A54282F894613001EC8F6 /* potato card */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+				B1A00000000000000000000F /* Exceptions for "potato card" folder in "potato card" target */,
+			);
 			path = "potato card";
 			sourceTree = "<group>";
 		};
@@ -283,7 +293,7 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 26.4;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
 				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
 				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
 				MTL_FAST_MATH = YES;
@@ -340,7 +350,7 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 26.4;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
 				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
 				MTL_ENABLE_DEBUG_INFO = NO;
 				MTL_FAST_MATH = YES;
@@ -357,22 +367,14 @@
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = F992GAYUKE;
+				DEVELOPMENT_TEAM = 8Y9V4HXPUQ;
 				ENABLE_PREVIEWS = YES;
-				GENERATE_INFOPLIST_FILE = YES;
+				GENERATE_INFOPLIST_FILE = NO;
 				HEADER_SEARCH_PATHS = (
 					"$(inherited)",
 					"$(PROJECT_DIR)/potato\\ card/Vendor/PickBleManager",
 				);
-				INFOPLIST_KEY_CFBundleDisplayName = "Tatoo!";
-				INFOPLIST_KEY_NSBluetoothAlwaysUsageDescription = "需要使用蓝牙搜索并连接墨水屏设备，用于传输图片。";
-				INFOPLIST_KEY_NSLocationWhenInUseUsageDescription = "需要定位当前城市天气，用于天气技能同步到墨水屏。";
-				INFOPLIST_KEY_NSSupportsLiveActivities = YES;
-				INFOPLIST_KEY_NSSupportsLiveActivitiesFrequentUpdates = YES;
-				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
-				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
-				INFOPLIST_KEY_UIBackgroundModes = "bluetooth-central";
-				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
+				INFOPLIST_FILE = "potato card/Info.plist";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
 				LD_RUNPATH_SEARCH_PATHS = (
@@ -381,12 +383,6 @@
 				);
 				LIBRARY_SEARCH_PATHS = (
 					"$(inherited)",
-					"$(PROJECT_DIR)/potato\\ card/Vendor/PickBleManager",
-					"$(PROJECT_DIR)/potato\\ card/Vendor/PickBleManager",
-					"$(PROJECT_DIR)/potato\\ card/Vendor/PickBleManager",
-					"$(PROJECT_DIR)/potato\\ card/Vendor/PickBleManager",
-					"$(PROJECT_DIR)/potato\\ card/Vendor/PickBleManager",
-					"$(PROJECT_DIR)/potato\\ card/Vendor/PickBleManager",
 					"$(PROJECT_DIR)/potato\\ card/Vendor/PickBleManager",
 					"$(PROJECT_DIR)/potato\\ card/Vendor/PickBleManager",
 					"$(PROJECT_DIR)/potato\\ card/Vendor/PickBleManager",
@@ -403,7 +399,7 @@
 					"-framework",
 					CoreText,
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = "com.xiaogousi.online.potato-card";
+				PRODUCT_BUNDLE_IDENTIFIER = com.liyouliang.potatocard;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				STRING_CATALOG_GENERATE_SYMBOLS = YES;
 				SWIFT_APPROACHABLE_CONCURRENCY = YES;
@@ -423,22 +419,14 @@
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = F992GAYUKE;
+				DEVELOPMENT_TEAM = 8Y9V4HXPUQ;
 				ENABLE_PREVIEWS = YES;
-				GENERATE_INFOPLIST_FILE = YES;
+				GENERATE_INFOPLIST_FILE = NO;
 				HEADER_SEARCH_PATHS = (
 					"$(inherited)",
 					"$(PROJECT_DIR)/potato\\ card/Vendor/PickBleManager",
 				);
-				INFOPLIST_KEY_CFBundleDisplayName = "Tatoo!";
-				INFOPLIST_KEY_NSBluetoothAlwaysUsageDescription = "需要使用蓝牙搜索并连接墨水屏设备，用于传输图片。";
-				INFOPLIST_KEY_NSLocationWhenInUseUsageDescription = "需要定位当前城市天气，用于天气技能同步到墨水屏。";
-				INFOPLIST_KEY_NSSupportsLiveActivities = YES;
-				INFOPLIST_KEY_NSSupportsLiveActivitiesFrequentUpdates = YES;
-				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
-				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
-				INFOPLIST_KEY_UIBackgroundModes = "bluetooth-central";
-				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
+				INFOPLIST_FILE = "potato card/Info.plist";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
 				LD_RUNPATH_SEARCH_PATHS = (
@@ -447,12 +435,6 @@
 				);
 				LIBRARY_SEARCH_PATHS = (
 					"$(inherited)",
-					"$(PROJECT_DIR)/potato\\ card/Vendor/PickBleManager",
-					"$(PROJECT_DIR)/potato\\ card/Vendor/PickBleManager",
-					"$(PROJECT_DIR)/potato\\ card/Vendor/PickBleManager",
-					"$(PROJECT_DIR)/potato\\ card/Vendor/PickBleManager",
-					"$(PROJECT_DIR)/potato\\ card/Vendor/PickBleManager",
-					"$(PROJECT_DIR)/potato\\ card/Vendor/PickBleManager",
 					"$(PROJECT_DIR)/potato\\ card/Vendor/PickBleManager",
 					"$(PROJECT_DIR)/potato\\ card/Vendor/PickBleManager",
 					"$(PROJECT_DIR)/potato\\ card/Vendor/PickBleManager",
@@ -469,7 +451,7 @@
 					"-framework",
 					CoreText,
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = "com.xiaogousi.online.potato-card";
+				PRODUCT_BUNDLE_IDENTIFIER = com.liyouliang.potatocard;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				STRING_CATALOG_GENERATE_SYMBOLS = YES;
 				SWIFT_APPROACHABLE_CONCURRENCY = YES;
@@ -489,19 +471,19 @@
 				CODE_SIGN_STYLE = Automatic;
 				COPY_PHASE_STRIP = NO;
 				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = F992GAYUKE;
+				DEVELOPMENT_TEAM = 8Y9V4HXPUQ;
 				GCC_DYNAMIC_NO_PIC = NO;
 				GCC_OPTIMIZATION_LEVEL = 0;
 				GENERATE_INFOPLIST_FILE = NO;
 				INFOPLIST_FILE = TransferLiveActivityWidget/Info.plist;
-				IPHONEOS_DEPLOYMENT_TARGET = 26.4;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
 					"@executable_path/../../Frameworks",
 				);
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = "com.xiaogousi.online.potato-card.transfer-live-activity-widget";
+				PRODUCT_BUNDLE_IDENTIFIER = "com.liyouliang.potatocard.transfer-live-activity-widget";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SKIP_INSTALL = YES;
 				STRING_CATALOG_GENERATE_SYMBOLS = YES;
@@ -522,17 +504,17 @@
 				COPY_PHASE_STRIP = YES;
 				CURRENT_PROJECT_VERSION = 1;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
-				DEVELOPMENT_TEAM = F992GAYUKE;
+				DEVELOPMENT_TEAM = 8Y9V4HXPUQ;
 				GENERATE_INFOPLIST_FILE = NO;
 				INFOPLIST_FILE = TransferLiveActivityWidget/Info.plist;
-				IPHONEOS_DEPLOYMENT_TARGET = 26.4;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
 					"@executable_path/../../Frameworks",
 				);
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = "com.xiaogousi.online.potato-card.transfer-live-activity-widget";
+				PRODUCT_BUNDLE_IDENTIFIER = "com.liyouliang.potatocard.transfer-live-activity-widget";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SKIP_INSTALL = YES;
 				STRING_CATALOG_GENERATE_SYMBOLS = YES;
